@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mystery Box Game - Siapa Kamu?</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        .container {
+            text-align: center;
+            max-width: 600px;
+            width: 100%;
+        }
+
+        h1 {
+            color: white;
+            font-size: clamp(1.5rem, 5vw, 2.5rem);
+            margin-bottom: 10px;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.3);
+            animation: titlePulse 2s ease-in-out infinite;
+        }
+
+        @keyframes titlePulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .subtitle {
+            color: rgba(255,255,255,0.9);
+            font-size: clamp(0.9rem, 3vw, 1.1rem);
+            margin-bottom: 30px;
+        }
+
+        .boxes-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin: 30px auto;
+            max-width: 400px;
+        }
+
+        .box {
+            aspect-ratio: 1;
+            background: linear-gradient(145deg, #ffffff, #e6e6e6);
+            border-radius: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: clamp(2rem, 8vw, 3.5rem);
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .box::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.3), transparent);
+            transform: rotate(45deg);
+            animation: shine 3s infinite;
+        }
+
+        @keyframes shine {
+            0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+        }
+
+        .box:hover {
+            transform: translateY(-10px) scale(1.05);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.4);
+        }
+
+        .box:active {
+            transform: translateY(-5px) scale(0.98);
+        }
+
+        .box.disabled {
+            pointer-events: none;
+            opacity: 0.5;
+        }
+
+        .result-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .result-content {
+            background: white;
+            padding: 40px 30px;
+            border-radius: 25px;
+            max-width: 90%;
+            width: 400px;
+            text-align: center;
+            animation: slideUp 0.5s ease;
+            position: relative;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(100px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .result-icon {
+            font-size: clamp(4rem, 15vw, 6rem);
+            margin-bottom: 20px;
+            animation: iconBounce 0.6s ease;
+        }
+
+        @keyframes iconBounce {
+            0%, 100% { transform: scale(1); }
+            25% { transform: scale(1.2) rotate(-10deg); }
+            50% { transform: scale(0.9) rotate(10deg); }
+            75% { transform: scale(1.1) rotate(-5deg); }
+        }
+
+        .preman-animation {
+            animation: preman-shake 0.5s ease infinite;
+        }
+
+        @keyframes preman-shake {
+            0%, 100% { transform: rotate(0deg) scale(1); }
+            25% { transform: rotate(-15deg) scale(1.1); }
+            50% { transform: rotate(15deg) scale(1.1); }
+            75% { transform: rotate(-10deg) scale(1.1); }
+        }
+
+        .pemalak-animation {
+            animation: pemalak-money 1s ease infinite;
+        }
+
+        @keyframes pemalak-money {
+            0%, 100% { transform: translateY(0) scale(1); }
+            25% { transform: translateY(-20px) scale(1.2); }
+            50% { transform: translateY(0) scale(1); }
+            75% { transform: translateY(-10px) scale(1.1); }
+        }
+
+        .result-title {
+            font-size: clamp(1.5rem, 5vw, 2rem);
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .result-description {
+            font-size: clamp(0.9rem, 3vw, 1.1rem);
+            color: #666;
+            margin-bottom: 25px;
+            line-height: 1.6;
+        }
+
+        .preman-theme {
+            background: linear-gradient(135deg, #ff416c, #ff4b2b);
+            color: white;
+        }
+
+        .preman-theme .result-title,
+        .preman-theme .result-description {
+            color: white;
+        }
+
+        .pemalak-theme {
+            background: linear-gradient(135deg, #f093fb, #f5576c);
+            color: white;
+        }
+
+        .pemalak-theme .result-title,
+        .pemalak-theme .result-description {
+            color: white;
+        }
+
+        .btn-reset {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 50px;
+            font-size: clamp(0.9rem, 3vw, 1.1rem);
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .btn-reset:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+        }
+
+        .btn-reset:active {
+            transform: translateY(-1px);
+        }
+
+        .floating-emojis {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .emoji {
+            position: absolute;
+            font-size: 2rem;
+            animation: float-up 3s ease-out forwards;
+            opacity: 0;
+        }
+
+        @keyframes float-up {
+            0% {
+                transform: translateY(0) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-300px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        .info-text {
+            color: rgba(255,255,255,0.8);
+            font-size: clamp(0.8rem, 2.5vw, 0.9rem);
+            margin-top: 20px;
+        }
+
+        @media (max-width: 480px) {
+            .boxes-container {
+                gap: 10px;
+            }
+
+            .result-content {
+                padding: 30px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎲 Mystery Box Game 🎲</h1>
+        <p class="subtitle">Pilih salah satu box dan temukan jati dirimu!</p>
+
+        <div class="boxes-container">
+            <div class="box" onclick="openBox(1)">
+                <span>📦</span>
+            </div>
+            <div class="box" onclick="openBox(2)">
+                <span>📦</span>
+            </div>
+            <div class="box" onclick="openBox(3)">
+                <span>📦</span>
+            </div>
+            <div class="box" onclick="openBox(4)">
+                <span>📦</span>
+            </div>
+        </div>
+
+        <p class="info-text">💡 Setiap box berisi karakter yang berbeda!</p>
+    </div>
+
+    <div class="result-modal" id="resultModal">
+        <div class="result-content" id="resultContent">
+            <div class="floating-emojis" id="floatingEmojis"></div>
+            <div class="result-icon" id="resultIcon"></div>
+            <h2 class="result-title" id="resultTitle"></h2>
+            <p class="result-description" id="resultDescription"></p>
+            <button class="btn-reset" onclick="resetGame()">Main Lagi! 🎮</button>
+        </div>
+    </div>
+
+    <script>
+        const roles = [
+            {
+                name: 'preman',
+                icon: '😠',
+                title: 'KAMU ADALAH PREMAN!',
+                description: 'Wah, galak banget! Kamu punya aura intimidasi yang kuat. Siapa yang berani sama kamu? 💪',
+                theme: 'preman-theme',
+                animation: 'preman-animation',
+                emojis: ['😠', '💪', '🔥', '⚡', '👊']
+            },
+            {
+                name: 'pemalak',
+                icon: '💰',
+                title: 'KAMU ADALAH PEMALAK!',
+                description: 'Kerjaanmu cuma satu: minta duit! Tapi ingat, rezeki yang halal lebih berkah lho~ 💸',
+                theme: 'pemalak-theme',
+                animation: 'pemalak-animation',
+                emojis: ['💰', '💸', '💵', '💴', '🤑']
+            }
+        ];
+
+        function openBox(boxNumber) {
+            const boxes = document.querySelectorAll('.box');
+            boxes.forEach(box => box.classList.add('disabled'));
+
+            const randomRole = roles[Math.floor(Math.random() * roles.length)];
+
+            setTimeout(() => {
+                showResult(randomRole);
+            }, 300);
+        }
+
+        function showResult(role) {
+            const modal = document.getElementById('resultModal');
+            const content = document.getElementById('resultContent');
+            const icon = document.getElementById('resultIcon');
+            const title = document.getElementById('resultTitle');
+            const description = document.getElementById('resultDescription');
+
+            content.className = 'result-content ' + role.theme;
+            icon.className = 'result-icon ' + role.animation;
+            icon.textContent = role.icon;
+            title.textContent = role.title;
+            description.textContent = role.description;
+
+            modal.style.display = 'flex';
+
+            createFloatingEmojis(role.emojis);
+        }
+
+        function createFloatingEmojis(emojis) {
+            const container = document.getElementById('floatingEmojis');
+            container.innerHTML = '';
+
+            for (let i = 0; i < 15; i++) {
+                const emoji = document.createElement('div');
+                emoji.className = 'emoji';
+                emoji.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+                emoji.style.left = Math.random() * 100 + '%';
+                emoji.style.animationDelay = Math.random() * 2 + 's';
+                container.appendChild(emoji);
+            }
+        }
+
+        function resetGame() {
+            const modal = document.getElementById('resultModal');
+            modal.style.display = 'none';
+
+            const boxes = document.querySelectorAll('.box');
+            boxes.forEach(box => {
+                box.classList.remove('disabled');
+            });
+        }
+    </script>
+</body>
+</html>
